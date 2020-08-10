@@ -206,15 +206,19 @@ class File(BaseFile):
         self.item.session.mount_http_adapter(max_retries=retries)
         file_path = self.name if not file_path else file_path
 
+        extra_headers = {}
         if destdir:
             if not os.path.exists(destdir) and return_responses is not True:
                 os.mkdir(destdir)
             if os.path.isfile(destdir):
                 raise IOError('{} is not a directory!'.format(destdir))
             file_path = os.path.join(destdir, file_path)
-
+        continu = True
         if not return_responses and os.path.exists(file_path.encode('utf-8')):
-            if ignore_existing:
+            if continu:
+                st = os.stat(file_path.encode('utf-8'))
+                extra_headers['Range'] = 'bytes={}-{}'.format(st.st_size, self.size - 1)
+            elif ignore_existing:
                 msg = 'skipping {0}, file already exists.'.format(file_path)
                 log.info(msg)
                 if verbose:
@@ -262,7 +266,8 @@ class File(BaseFile):
                                              stream=True,
                                              timeout=12,
                                              auth=self.auth,
-                                             params=params)
+                                             params=params,
+                                             headers=extra_headers)
             response.raise_for_status()
             if return_responses:
                 return response
@@ -270,7 +275,11 @@ class File(BaseFile):
             if not chunk_size:
                 chunk_size = 1000000
             if not fileobj:
-                fileobj = open(file_path.encode('utf-8'), 'wb')
+                if 'Range' in extra_headers:
+                    print('Continuing {}'.format(extra_headers['Range']))
+                    fileobj = open(file_path.encode('utf-8'), 'ab')
+                else:
+                    fileobj = open(file_path.encode('utf-8'), 'wb')
 
             with fileobj:
                 for chunk in response.iter_content(chunk_size=chunk_size):
