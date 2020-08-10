@@ -74,7 +74,7 @@ class Search(object):
         self.search_url = '{0}//{1}/advancedsearch.php'.format(
             self.session.protocol, self.session.host)
         self.auth = S3Auth(self.session.access_key, self.session.secret_key)
-        self.max_retries = max_retries if max_retries is not None else 5
+        self.max_retries = max_retries if max_retries is not None else 100
 
         # Initialize params.
         default_params = dict(q=query, REQUIRE_AUTH='true')

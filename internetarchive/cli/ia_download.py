@@ -17,6 +17,9 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+# Note, <retries> [default: 100] does not work, it only reads the first character,
+# hence the hack in files.py instead.
+
 """Download files from Archive.org.
 
 usage:
@@ -33,7 +36,7 @@ options:
     -d, --dry-run                            Print URLs to stdout and exit.
     -i, --ignore-existing                    Clobber files already downloaded.
     -C, --checksum                           Skip files based on checksum [default: False].
-    -R, --retries=<retries>                  Set number of retries to <retries> [default: 5].
+    -R, --retries=<retries>                  Set number of retries to <retries> [default: 100].
     -I, --itemlist=<file>                    Download items from a specified file. Itemlists should
                                              be a plain text file with one identifier per line.
     -S, --search=<query>                     Download items returned from a specified search query.

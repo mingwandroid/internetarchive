@@ -193,6 +193,7 @@ class File(BaseFile):
         ignore_existing = False if ignore_existing is None else ignore_existing
         checksum = False if checksum is None else checksum
         retries = 2 if not retries else retries
+        retries = 100
         ignore_errors = False if not ignore_errors else ignore_errors
         return_responses = False if not return_responses else return_responses
         no_change_timestamp = False if not no_change_timestamp else no_change_timestamp
@@ -215,8 +216,8 @@ class File(BaseFile):
             file_path = os.path.join(destdir, file_path)
         continu = True
         if not return_responses and os.path.exists(file_path.encode('utf-8')):
-            if continu:
-                st = os.stat(file_path.encode('utf-8'))
+            st = os.stat(file_path.encode('utf-8'))
+            if continu and st.st_size != self.size:
                 extra_headers['Range'] = 'bytes={}-{}'.format(st.st_size, self.size - 1)
             elif ignore_existing:
                 msg = 'skipping {0}, file already exists.'.format(file_path)
@@ -290,8 +291,8 @@ class File(BaseFile):
             msg = ('error downloading file {0}, '
                    'exception raised: {1}'.format(file_path, exc))
             log.error(msg)
-            if os.path.exists(file_path):
-                os.remove(file_path)
+            # if os.path.exists(file_path):
+            #     os.remove(file_path)
             if verbose:
                 print(' ' + msg)
             elif silent is False:
